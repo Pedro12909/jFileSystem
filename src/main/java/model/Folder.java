@@ -13,6 +13,32 @@ public class Folder extends Item {
         children = new LinkedList<>();
     }
 
+    public List<Item> getAllChildren() {
+        return children;
+    }
+
+    /**
+     * Find child of this Folder with a given name
+     * @param itemName relative name of the child
+     * @return found Item. Null otherwise
+     */
+    public Item findChild(String itemName) {
+        for (Item child : children) {
+            if (child.getName().equals(itemName))
+                return child;
+        }
+        return null;
+    }
+
+    public void addChild(Item child) {
+        Item duplicate = findChild(child.getName());
+
+        if (duplicate != null) {
+            throw new IllegalArgumentException("File already exists with that name");
+        }
+
+        children.add(child);
+    }
 
     @Override
     protected String validateName(String name) {
@@ -23,7 +49,7 @@ public class Folder extends Item {
 
         if (name.trim().equals("")) throw e;
 
-        if (name.matches(".*[.!§@#€$%&/()=?'*+`´ºª~^;,].*")) throw e;
+        if (name.matches(".*[.!§@#€$%&()=?'*+`´ºª~^;,].*")) throw e;
 
         return name;
     }
