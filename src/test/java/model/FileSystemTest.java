@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class FileSystemTest {
 
+    private FileSystem instance;
+
     private Author author;
     private Permissions perms;
 
@@ -24,6 +26,8 @@ public class FileSystemTest {
 
     @BeforeEach
     void setUp() {
+        instance = new FileSystem();
+
         author = new Author("John");
         perms = new Permissions(true, true, true);
 
@@ -37,6 +41,17 @@ public class FileSystemTest {
         fileB2 = new File("FileB", author, perms);
         fileC = new File("FileC", author, perms);
         fileD = new File("FileD", author, perms);
+    }
+
+
+    @Test
+    public void testFindItem() {
+        instance.addItemToFolder("/", fileA);
+        instance.addItemToFolder("/", folderA);
+
+        folderA.addChild(folderB1);
+        folderA.addChild(folderC);
+        folderA.addChild(fileB1);
 
         folderB1.addChild(folderB2);
         folderB1.addChild(fileB2);
@@ -44,32 +59,93 @@ public class FileSystemTest {
 
         folderC.addChild(fileD);
 
-        folderA.addChild(folderB1);
-        folderA.addChild(folderC);
-        folderA.addChild(fileB1);
-    }
-
-
-    @Test
-    public void testFindItem() {
-        FileSystem instance = FileSystem.getInstance();
-
-        instance.addItemToFolder("/", fileA);
-        instance.addItemToFolder("/", folderA);
-
         assertEquals(instance.findItem("/FolderA/FolderB/FileC"), fileC);
         assertEquals(instance.findItem("/FolderA/FolderB/FileB"), fileB2);
-        assertEquals(instance.findItem("/FolderA/FolderB/FileB/"), fileB2);
-        assertEquals(instance.findItem("/FolderA/FolderB/FileB////"), fileB2);
         assertEquals(instance.findItem("/FolderA"), folderA);
         assertEquals(instance.findItem("/FolderA/FolderB/FolderB"), folderB2);
         assertEquals(instance.findItem("/FolderA/FolderB"), folderB1);
-        assertEquals(instance.findItem("/FolderA/FolderB/"), folderB1);
+        assertEquals(instance.findItem("/FolderA/FolderB"), folderB1);
 
         assertNull(instance.findItem("test"));
         assertNull(instance.findItem("//"));
         assertNull(instance.findItem("fd//asd"));
         assertNull(instance.findItem("fd/FolderA"));
         assertNull(instance.findItem("/FolderA///FolderB"));
+        assertNull(instance.findItem("/FolderA/FolderB/FileB/"));
+        assertNull(instance.findItem("/FolderA/FolderB/FileB////"));
+    }
+
+    @Test
+    public void testAddChild() {
+        Folder root = ((Folder)instance.findItem("/"));
+
+        instance.addItemToFolder("/", fileA);
+        assertEquals("/FileA", fileA.getAbsolutePath());
+        assert(root.getAllChildren().contains(fileA));
+
+        instance.addItemToFolder("/", folderA);
+
+        folderA.addChild(folderB1);
+        folderA.addChild(folderC);
+        folderA.addChild(fileB1);
+
+        folderB1.addChild(folderB2);
+        folderB1.addChild(fileB2);
+        folderB1.addChild(fileC);
+
+        folderC.addChild(fileD);
+
+        File testFile = new File("TestFile", author, perms);
+        instance.addItemToFolder("/FolderA/FolderB/FolderB", testFile);
+        assertEquals("/FolderA/FolderB/FolderB/TestFile",
+                testFile.getAbsolutePath());
+        assert(folderB2.getAllChildren().contains(testFile));
+        assertEquals(1, folderB2.getAllChildren().size());
+    }
+
+    @Test
+    public void testMoveChild() {
+        instance.addItemToFolder("/", fileA);
+        instance.addItemToFolder("/", folderA);
+
+        folderA.addChild(folderB1);
+        folderA.addChild(folderC);
+        folderA.addChild(fileB1);
+
+        folderB1.addChild(folderB2);
+        folderB1.addChild(fileB2);
+        folderB1.addChild(fileC);
+
+        folderC.addChild(fileD);
+
+        instance.moveItem(folderB1, "/");
+
+        assertEquals("/FolderB", folderB1.getAbsolutePath());
+        assertEquals("/FolderB/FileB", fileB2.getAbsolutePath());
+        assertEquals("/FolderB/FileC", fileC.getAbsolutePath());
+        assertEquals("/FolderB/FolderB", folderB2.getAbsolutePath());
+    }
+
+    @Test
+    public void testDeleteChild() {
+        instance.addItemToFolder("/", fileA);
+        instance.addItemToFolder("/", folderA);
+
+        folderA.addChild(folderB1);
+        folderA.addChild(folderC);
+        folderA.addChild(fileB1);
+
+        folderB1.addChild(folderB2);
+        folderB1.addChild(fileB2);
+        folderB1.addChild(fileC);
+
+        folderC.addChild(fileD);
+
+        instance.deleteItem(folderB2);
+        assert(!folderB1.getAllChildren().contains(folderB2));
+
+        instance.deleteItem("/FolderA/FolderB");
+        assert(!folderA.getAllChildren().contains(folderB1));
+        assertEquals(2, folderA.getAllChildren().size());
     }
 }

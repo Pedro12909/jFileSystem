@@ -37,7 +37,35 @@ public class Folder extends Item {
             throw new IllegalArgumentException("File already exists with that name");
         }
 
+        String path = getAbsolutePath();
+        // Checks if this folder is not root
+        if (path.equals("/")) {
+            child.changePath(path + child.getName());
+        } else {
+            child.changePath(path + "/" + child.getName());
+        }
+
         children.add(child);
+
+        updatePath(getAbsolutePath());
+    }
+
+    public void updatePath(String pathOfParent) {
+        for (Item child : children) {
+            if (pathOfParent.equals("/")) {
+                child.changePath(pathOfParent + child.getName());
+            } else {
+                child.changePath(pathOfParent + "/" + child.getName());
+            }
+
+            if (child instanceof Folder) {
+                ((Folder)child).updatePath(child.getAbsolutePath());
+            }
+        }
+    }
+
+    public void deleteChild(Item child) {
+        children.remove(child);
     }
 
     @Override
