@@ -1,14 +1,29 @@
 package model;
 
+/**
+ * The File System
+ * Holds all file system-related behaviour
+ */
 public class FileSystem {
 
+    /**
+     * Root Folder
+     */
     private Folder root;
 
+    /**
+     * Creates a new FileSystem instance with a root item
+     */
     public FileSystem() {
         root = new Folder("/", new Author("su"),
                 new Permissions(true, true, true));
     }
 
+    /**
+     * Finds an Item given it's absolute path in the file system
+     * @param pathToItem item's absolute path
+     * @return found Item
+     */
     public Item findItem(String pathToItem) {
         if (pathToItem == null) return null;
 
@@ -59,6 +74,11 @@ public class FileSystem {
         return null;
     }
 
+    /**
+     * Adds a given Item to a folder
+     * @param pathToFolder absolute path of destination folder
+     * @param newItem Item to be added
+     */
     public void addItemToFolder(String pathToFolder, Item newItem) {
         if (newItem == null) {
             throw new IllegalArgumentException("Null Item given.");
@@ -77,12 +97,22 @@ public class FileSystem {
         ((Folder)foundItem).addChild(newItem);
     }
 
+    /**
+     * Copies one item to another folder
+     * @param pathOfItem absolute path of item to be copied
+     * @param newPath absolute path of destination folder
+     */
     public void copyItem(String pathOfItem, String newPath) {
         Item item = findItem(pathOfItem);
 
         copyItem(item, newPath);
     }
 
+    /**
+     * Copies one item to another folder
+     * @param item item to be copied
+     * @param newPath absolute path of destination folder
+     */
     public void copyItem(Item item, String newPath) {
         if (item == null)
             throw new IllegalArgumentException("Null item given.");
@@ -94,12 +124,22 @@ public class FileSystem {
         newParent.addChild(item);
     }
 
+    /**
+     * Moves one item to another folder
+     * @param pathOfItem absolute path of item to be moved
+     * @param newPath absolute path of destination folder
+     */
     public void moveItem(String pathOfItem, String newPath) {
         Item item = findItem(pathOfItem);
 
         moveItem(item, newPath);
     }
 
+    /**
+     * Moves one item to another folder
+     * @param item item to be moved
+     * @param newPath absolute path of destination folder
+     */
     public void moveItem(Item item, String newPath) {
         if (item == null)
             throw new IllegalArgumentException("Null item given.");
@@ -113,6 +153,14 @@ public class FileSystem {
         newParent.addChild(item);
     }
 
+    /**
+     * Checks if item is parent of new parent
+     * Used to prevent stack overflow errors when
+     * moving/copying a folder to one of it's children
+     *
+     * @param item item to be moved
+     * @param newParent destination folder
+     */
     private void checkInfiniteLoop(Item item, Folder newParent) {
         if (item instanceof Folder) {
             if (((Folder)item).findFolder(newParent) != null) {
@@ -121,6 +169,11 @@ public class FileSystem {
         }
     }
 
+    /**
+     * Checks if an item with a given absolute path is a folder
+     * @param path absolute path
+     * @return true if item is a folder
+     */
     private Folder checkPathIsFolder(String path) {
         Item item = findItem(path);
 
@@ -133,12 +186,20 @@ public class FileSystem {
         return (Folder)item;
     }
 
+    /**
+     * Deletes an item from the file system tree
+     * @param path absolute path of item to be removed
+     */
     public void deleteItem(String path) {
         Item item = findItem(path);
 
         deleteItem(item);
     }
 
+    /**
+     * Deletes an item from the file system tree
+     * @param item item to be removed
+     */
     public void deleteItem(Item item) {
         if (item == null) {
             throw new IllegalArgumentException("Could not find path specified.");
