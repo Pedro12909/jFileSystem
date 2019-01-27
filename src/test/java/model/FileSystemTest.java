@@ -3,8 +3,7 @@ package model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FileSystemTest {
 
@@ -104,7 +103,38 @@ public class FileSystemTest {
     }
 
     @Test
-    public void testMoveChild() {
+    public void testCopyItem() {
+        instance.addItemToFolder("/", fileA);
+        instance.addItemToFolder("/", folderA);
+
+        folderA.addChild(folderB1);
+        folderA.addChild(folderC);
+        folderA.addChild(fileB1);
+
+        folderB1.addChild(folderB2);
+        folderB1.addChild(fileB2);
+        folderB1.addChild(fileC);
+
+        folderC.addChild(fileD);
+
+        Throwable e;
+        e = assertThrows(IllegalArgumentException.class, () -> {
+            instance.copyItem(folderA, "/FolderA/FolderB");
+        });
+        assertEquals("Cannot add item to itself.", e.getMessage());
+        assertFalse(folderB1.getAllChildren().contains(folderA));
+
+        instance.copyItem(folderB1, "/");
+
+        assertTrue(folderA.getAllChildren().contains(folderB1));
+        assertEquals("/FolderB", folderB1.getAbsolutePath());
+        assertEquals("/FolderB/FileB", fileB2.getAbsolutePath());
+        assertEquals("/FolderB/FileC", fileC.getAbsolutePath());
+        assertEquals("/FolderB/FolderB", folderB2.getAbsolutePath());
+    }
+
+    @Test
+    public void testMoveItem() {
         instance.addItemToFolder("/", fileA);
         instance.addItemToFolder("/", folderA);
 
@@ -120,6 +150,7 @@ public class FileSystemTest {
 
         instance.moveItem(folderB1, "/");
 
+        assertTrue(!folderA.getAllChildren().contains(folderB1));
         assertEquals("/FolderB", folderB1.getAbsolutePath());
         assertEquals("/FolderB/FileB", fileB2.getAbsolutePath());
         assertEquals("/FolderB/FileC", fileC.getAbsolutePath());
@@ -142,10 +173,10 @@ public class FileSystemTest {
         folderC.addChild(fileD);
 
         instance.deleteItem(folderB2);
-        assert(!folderB1.getAllChildren().contains(folderB2));
+        assertTrue(!folderB1.getAllChildren().contains(folderB2));
 
         instance.deleteItem("/FolderA/FolderB");
-        assert(!folderA.getAllChildren().contains(folderB1));
+        assertTrue(!folderA.getAllChildren().contains(folderB1));
         assertEquals(2, folderA.getAllChildren().size());
     }
 }

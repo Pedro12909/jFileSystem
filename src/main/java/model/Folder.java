@@ -30,6 +30,21 @@ public class Folder extends Item {
         return null;
     }
 
+    public Folder findFolder(Folder folder) {
+        if (getAbsolutePath().equals(folder.getAbsolutePath())) return folder;
+
+        Folder res = null;
+        for (Item child : children) {
+            if (child instanceof Folder) {
+                res = ((Folder)child).findFolder(folder);
+
+                if (res != null) return res;
+            }
+        }
+
+        return res;
+    }
+
     public void addChild(Item child) {
         Item duplicate = findChild(child.getName());
 

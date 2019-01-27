@@ -59,7 +59,6 @@ public class FileSystem {
         return null;
     }
 
-
     public void addItemToFolder(String pathToFolder, Item newItem) {
         if (newItem == null) {
             throw new IllegalArgumentException("Null Item given.");
@@ -78,6 +77,30 @@ public class FileSystem {
         ((Folder)foundItem).addChild(newItem);
     }
 
+    public void copyItem(String pathOfItem, String newPath) {
+        Item item = findItem(pathOfItem);
+
+        copyItem(item, newPath);
+    }
+
+    public void copyItem(Item item, String newPath) {
+        if (item == null)
+            throw new IllegalArgumentException("Null item given.");
+
+        Folder newParent = checkPathIsFolder(newPath);
+
+        // Check if new parent is child of item
+        // Needs to be done to prevent item from being added to itself
+        if (item instanceof Folder) {
+            if (((Folder)item).findFolder(newParent) != null) {
+                throw new IllegalArgumentException("Cannot add item to itself.");
+            }
+        }
+
+
+        newParent.addChild(item);
+    }
+
     public void moveItem(String pathOfItem, String newPath) {
         Item item = findItem(pathOfItem);
 
@@ -88,17 +111,23 @@ public class FileSystem {
         if (item == null)
             throw new IllegalArgumentException("Null item given.");
 
-        Item newParent = findItem(newPath);
-
-        if (newParent == null)
-            throw new IllegalArgumentException("Could not find path specified.");
-
-        if (!(newParent instanceof Folder))
-            throw new IllegalArgumentException("New path is not a folder");
+        Folder newParent = checkPathIsFolder(newPath);
 
         deleteItem(item);
 
-        ((Folder) newParent).addChild(item);
+        newParent.addChild(item);
+    }
+
+    private Folder checkPathIsFolder(String path) {
+        Item item = findItem(path);
+
+        if (item == null)
+            throw new IllegalArgumentException("Could not find path specified.");
+
+        if (!(item instanceof Folder))
+            throw new IllegalArgumentException("New path is not a folder");
+
+        return (Folder)item;
     }
 
     public void deleteItem(String path) {
