@@ -61,6 +61,7 @@ public class Folder extends Item {
         }
 
         children.add(child);
+        updateModifiedTime();
 
         updatePath(getAbsolutePath());
     }

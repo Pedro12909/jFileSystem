@@ -10,6 +10,12 @@ public class File extends Item {
         content = "";
     }
 
+    public File(String name, String content, Author loggedUser, Permissions permissions) {
+        super(name, loggedUser, permissions);
+
+        this.content = content;
+    }
+
     @Override
     protected String validateName(String name) {
         IllegalArgumentException e =
@@ -22,5 +28,9 @@ public class File extends Item {
         if (name.matches(".*[!§@#€$%&/()=?'*+`´ºª~^;,].*")) throw e;
 
         return name;
+    }
+
+    public String getContent() {
+        return this.content;
     }
 }

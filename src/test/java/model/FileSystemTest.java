@@ -148,6 +148,12 @@ public class FileSystemTest {
 
         folderC.addChild(fileD);
 
+        Throwable e;
+        e = assertThrows(IllegalArgumentException.class, () -> {
+            instance.moveItem(folderA, "/FolderA/FolderB");
+        });
+        assertEquals("Cannot add item to itself.", e.getMessage());
+
         instance.moveItem(folderB1, "/");
 
         assertTrue(!folderA.getAllChildren().contains(folderB1));

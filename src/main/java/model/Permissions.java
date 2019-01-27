@@ -14,27 +14,13 @@ public class Permissions {
         this.execute = execute;
     }
 
-    public boolean hasRead() {
-        return read;
-    }
+    @Override
+    public String toString() {
+        String res = "";
+        if (read) res += "r";
+        if (write) res += "w";
+        if (execute) res += "x";
 
-    public void setRead(boolean read) {
-        this.read = read;
-    }
-
-    public boolean hasWrite() {
-        return write;
-    }
-
-    public void setWrite(boolean write) {
-        this.write = write;
-    }
-
-    public boolean hasExecute() {
-        return execute;
-    }
-
-    public void setExecute(boolean execute) {
-        this.execute = execute;
+        return res;
     }
 }

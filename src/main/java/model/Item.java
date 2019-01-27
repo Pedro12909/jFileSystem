@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public abstract class Item {
@@ -40,12 +41,35 @@ public abstract class Item {
         return name;
     }
 
+    public Author getAuthor() {
+        return author;
+    }
+
+    public Permissions getPermissions() {
+        return permissions;
+    }
+
+    public String createdAt() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return created.format(formatter);
+    }
+
+    public String modifiedAt() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return modified.format(formatter);
+    }
+
     public String getAbsolutePath() {
         return path;
     }
 
     public void changePath(String newPath) {
         path = newPath;
+        updateModifiedTime();
+    }
+
+    protected void updateModifiedTime() {
+        modified = LocalDateTime.now();
     }
 
     protected abstract String validateName(String name);

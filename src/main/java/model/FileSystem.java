@@ -89,14 +89,7 @@ public class FileSystem {
 
         Folder newParent = checkPathIsFolder(newPath);
 
-        // Check if new parent is child of item
-        // Needs to be done to prevent item from being added to itself
-        if (item instanceof Folder) {
-            if (((Folder)item).findFolder(newParent) != null) {
-                throw new IllegalArgumentException("Cannot add item to itself.");
-            }
-        }
-
+        checkInfiniteLoop(item, newParent);
 
         newParent.addChild(item);
     }
@@ -113,9 +106,19 @@ public class FileSystem {
 
         Folder newParent = checkPathIsFolder(newPath);
 
+        checkInfiniteLoop(item, newParent);
+
         deleteItem(item);
 
         newParent.addChild(item);
+    }
+
+    private void checkInfiniteLoop(Item item, Folder newParent) {
+        if (item instanceof Folder) {
+            if (((Folder)item).findFolder(newParent) != null) {
+                throw new IllegalArgumentException("Cannot add item to itself.");
+            }
+        }
     }
 
     private Folder checkPathIsFolder(String path) {
@@ -137,11 +140,20 @@ public class FileSystem {
     }
 
     public void deleteItem(Item item) {
+        if (item == null) {
+            throw new IllegalArgumentException("Could not find path specified.");
+        }
         int indexOfFather = item.getAbsolutePath().lastIndexOf("/");
 
         String pathOfParent = item.getAbsolutePath().substring(0, indexOfFather);
 
-        Item currentParent = findItem(pathOfParent);
+        Item currentParent = null;
+
+        if (pathOfParent.equals("")) {
+            currentParent = root;
+        } else {
+            currentParent= findItem(pathOfParent);
+        }
 
         ((Folder)currentParent).deleteChild(item);
     }
